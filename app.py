@@ -48,9 +48,9 @@ def generate_tts(client, text, voice="Zephyr", instruction="", temperature=1.0, 
     try:
         # Combine instruction and text if instruction is provided
         if instruction:
-            contents = f"""Instructions: {instruction}
+            contents = f"""# Instructions: {instruction}
 
-Please read the following lines according to the instructions above:
+# Read the following lines according to the instructions above:
 "{text}" """
         else:
             contents = text
