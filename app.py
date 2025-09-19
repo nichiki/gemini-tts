@@ -126,6 +126,47 @@ VOICE_INFO = {
 
 VOICE_OPTIONS = list(VOICE_INFO.keys())
 
+# Simple authentication
+def check_password():
+    """Returns `True` if the user had the correct password."""
+
+    def password_entered():
+        """Checks whether a password entered by the user is correct."""
+        # Get password from secrets or environment
+        try:
+            correct_password = st.secrets["APP_PASSWORD"]
+        except:
+            correct_password = os.environ.get("APP_PASSWORD", "demo123")  # Default for development
+
+        if st.session_state["password"] == correct_password:
+            st.session_state["password_correct"] = True
+            del st.session_state["password"]  # Don't store password
+        else:
+            st.session_state["password_correct"] = False
+
+    if "password_correct" not in st.session_state:
+        # First run, show input for password
+        st.text_input(
+            "パスワードを入力してください",
+            type="password",
+            on_change=password_entered,
+            key="password"
+        )
+        return False
+    elif not st.session_state["password_correct"]:
+        # Password not correct, show input + error
+        st.text_input(
+            "パスワードを入力してください",
+            type="password",
+            on_change=password_entered,
+            key="password"
+        )
+        st.error("😕 パスワードが正しくありません")
+        return False
+    else:
+        # Password correct
+        return True
+
 # Streamlit App
 def main():
     st.set_page_config(
@@ -133,10 +174,15 @@ def main():
         page_icon="🎙️",
         layout="wide"
     )
-    
+
     st.title("🎙️ Gemini TTS 一括音声生成ツール")
+
+    # Check authentication
+    if not check_password():
+        st.stop()
+
     st.markdown("台本CSVをアップロードして、複数の音声を一括生成します。")
-    
+
     # Initialize session state
     if 'generated_files' not in st.session_state:
         st.session_state.generated_files = []
